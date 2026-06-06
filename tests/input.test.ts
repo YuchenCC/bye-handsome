@@ -69,6 +69,25 @@ describe("prepareWorkspace", () => {
     await expect(access(extractedPath)).rejects.toThrow();
   });
 
+  it("resolves zip input with a single top-level project directory to the project root", async () => {
+    const root = await createTestRoot();
+    const zipPath = join(root, "nested-project.zip");
+    const zip = new AdmZip();
+    zip.addFile("legacy-app/package.json", Buffer.from('{"scripts":{}}\n', "utf8"));
+    zip.addFile("legacy-app/src/index.ts", Buffer.from("export const ok = true;\n", "utf8"));
+    zip.writeZip(zipPath);
+
+    const workspace = await prepareWorkspace(zipPath);
+
+    expect(workspace.workspacePath.endsWith("legacy-app")).toBe(true);
+    await expect(access(join(workspace.workspacePath, "package.json"))).resolves.toBeUndefined();
+    await expect(access(join(workspace.workspacePath, "src", "index.ts"))).resolves.toBeUndefined();
+
+    const extractedPath = workspace.workspacePath;
+    await workspace.cleanup();
+    await expect(access(extractedPath)).rejects.toThrow();
+  });
+
   it("removes the temporary workspace when zip parsing fails", async () => {
     const root = await createTestRoot();
     const zipPath = join(root, "corrupt.zip");

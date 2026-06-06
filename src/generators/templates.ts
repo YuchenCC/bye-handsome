@@ -143,3 +143,21 @@ export function renderQualityCheckPolicy(): string {
 代码生成后只检查变更过的前端源码文件，优先运行项目已有 ESLint 命令；错误修复不得扩大修改范围。
 `;
 }
+
+export function renderTemplateDocs({ templates }: ContextTemplateInput): string {
+  return `# 模板说明
+
+${templates.examples
+  .map((example) => `- ${example.title}：\`${example.filePath}\`，${example.notes}`)
+  .join("\n") || "- 暂无模板示例，需人工补充。"}
+`;
+}
+
+export function renderExampleDocs({ templates }: ContextTemplateInput): string {
+  return `# 示例说明
+
+${templates.examples
+  .map((example) => `- ${example.kind} / ${example.title}：\`${example.filePath}\``)
+  .join("\n") || "- 暂无示例，需人工补充。"}
+`;
+}

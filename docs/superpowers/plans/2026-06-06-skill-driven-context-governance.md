@@ -188,7 +188,7 @@ git commit -m "Add evidence package generation"
 - Test: `tests/contextPackage.test.ts`
 - Update: `openspec/changes/skill-driven-context-governance-prd/tasks.md`
 
-- [ ] **Step 1: Write failing layout and zip tests**
+- [x] **Step 1: Write failing layout and zip tests**
 
 Add a zip fixture test where the zip contains one top-level directory with `package.json` inside it. Assert `prepareWorkspace()` resolves `workspacePath` to that nested project root.
 
@@ -210,7 +210,7 @@ npx vitest run tests/input.test.ts tests/contextPackage.test.ts
 
 Expected: FAIL on current zip root and old `.ai-context` filenames.
 
-- [ ] **Step 2: Implement zip root resolution**
+- [x] **Step 2: Implement zip root resolution**
 
 In `prepareWorkspace`, after extraction:
 
@@ -218,7 +218,7 @@ In `prepareWorkspace`, after extraction:
 - if there is exactly one top-level directory and it contains `package.json`, set `workspacePath` to that directory.
 - keep cleanup pointing at the extraction temp root.
 
-- [ ] **Step 3: Correct `.ai-context` filenames and docs directories**
+- [x] **Step 3: Correct `.ai-context` filenames and docs directories**
 
 Update `contextDocGenerateSkill` to write:
 
@@ -232,7 +232,7 @@ docs/ai/examples/README.md
 
 Remove writes to old `.ai-context/output-format.md`, `.ai-context/plan-do-policy.md`, and `.ai-context/quality-check-policy.md`.
 
-- [ ] **Step 4: Verify and commit**
+- [x] **Step 4: Verify and commit**
 
 Run:
 

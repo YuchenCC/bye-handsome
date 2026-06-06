@@ -23,10 +23,10 @@
 
 ## 4. Output Package Alignment
 
-- [ ] 4.1 修正 `.ai-context` 文件名为 `qwen32b-system-prompt.md`、`qwen32b-context-policy.md`、`qwen32b-output-format.md`、`qwen32b-plan-do-policy.md` 和 `qwen32b-quality-check.md`。
-- [ ] 4.2 增加预期的 `docs/ai/templates` 和 `docs/ai/examples` 输出，或明确将其映射到生成的 index artifacts。
-- [ ] 4.3 确保带单一顶层项目目录的 zip 输入会先解析到真实项目根目录再扫描。
-- [ ] 4.4 增加资料包级测试，验证完整预期输出布局。
+- [x] 4.1 修正 `.ai-context` 文件名为 `qwen32b-system-prompt.md`、`qwen32b-context-policy.md`、`qwen32b-output-format.md`、`qwen32b-plan-do-policy.md` 和 `qwen32b-quality-check.md`。
+- [x] 4.2 增加预期的 `docs/ai/templates` 和 `docs/ai/examples` 输出，或明确将其映射到生成的 index artifacts。
+- [x] 4.3 确保带单一顶层项目目录的 zip 输入会先解析到真实项目根目录再扫描。
+- [x] 4.4 增加资料包级测试，验证完整预期输出布局。
 
 ## 5. Generated User AI Coding Guide Skill
 

@@ -60,6 +60,11 @@ describe("contextDocGenerateSkill", () => {
     await expect(access(join(outputPath, ".ai-index/request-wrappers.json"))).resolves.toBeUndefined();
     await expect(access(join(outputPath, ".ai-index/page-api-relations.json"))).resolves.toBeUndefined();
     await expect(access(join(outputPath, ".ai-context/qwen32b-context-policy.md"))).resolves.toBeUndefined();
+    await expect(access(join(outputPath, ".ai-context/qwen32b-output-format.md"))).resolves.toBeUndefined();
+    await expect(access(join(outputPath, ".ai-context/qwen32b-plan-do-policy.md"))).resolves.toBeUndefined();
+    await expect(access(join(outputPath, ".ai-context/qwen32b-quality-check.md"))).resolves.toBeUndefined();
+    await expect(access(join(outputPath, "docs/ai/templates/README.md"))).resolves.toBeUndefined();
+    await expect(access(join(outputPath, "docs/ai/examples/README.md"))).resolves.toBeUndefined();
     await expect(access(join(outputPath, "AGENT_USAGE.md"))).resolves.toBeUndefined();
 
     const report = await readFile(join(outputPath, "docs/ai/governance-report.md"), "utf8");

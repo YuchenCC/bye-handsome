@@ -8,10 +8,12 @@ import {
   renderInventoryDoc,
   renderPlanDoPolicy,
   renderQualityCheckPolicy,
+  renderExampleDocs,
   renderQwenOutputFormat,
   renderQwenPolicy,
   renderQwenSystemPrompt,
   renderSystemProfile,
+  renderTemplateDocs,
   renderUserGuide
 } from "../generators/templates.js";
 import { writeGovernanceSkillRegistry } from "./registry.js";
@@ -57,6 +59,8 @@ export async function contextDocGenerateSkill(options: ContextDocGenerateOptions
     ),
     writePackageFile(options.outputPath, "docs/ai/ai-coding-rules.md", renderAiCodingRules()),
     writePackageFile(options.outputPath, "docs/ai/AI_CODING_USER_GUIDE.md", renderUserGuide()),
+    writePackageFile(options.outputPath, "docs/ai/templates/README.md", renderTemplateDocs(input)),
+    writePackageFile(options.outputPath, "docs/ai/examples/README.md", renderExampleDocs(input)),
     writePackageFile(
       options.outputPath,
       "docs/ai/governance-report.md",
@@ -92,9 +96,9 @@ export async function contextDocGenerateSkill(options: ContextDocGenerateOptions
     }),
     writePackageFile(options.outputPath, ".ai-context/qwen32b-system-prompt.md", renderQwenSystemPrompt()),
     writePackageFile(options.outputPath, ".ai-context/qwen32b-context-policy.md", renderQwenPolicy()),
-    writePackageFile(options.outputPath, ".ai-context/output-format.md", renderQwenOutputFormat()),
-    writePackageFile(options.outputPath, ".ai-context/plan-do-policy.md", renderPlanDoPolicy()),
-    writePackageFile(options.outputPath, ".ai-context/quality-check-policy.md", renderQualityCheckPolicy()),
+    writePackageFile(options.outputPath, ".ai-context/qwen32b-output-format.md", renderQwenOutputFormat()),
+    writePackageFile(options.outputPath, ".ai-context/qwen32b-plan-do-policy.md", renderPlanDoPolicy()),
+    writePackageFile(options.outputPath, ".ai-context/qwen32b-quality-check.md", renderQualityCheckPolicy()),
     writeGovernanceSkillRegistry(options.outputPath)
   ]);
 }

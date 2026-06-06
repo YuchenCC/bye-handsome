@@ -1,5 +1,5 @@
 import AdmZip from "adm-zip";
-import { mkdtemp, rm, stat } from "node:fs/promises";
+import { mkdtemp, readdir, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { WorkspaceInput } from "./types.js";
@@ -24,10 +24,12 @@ export async function prepareWorkspace(inputPath: string): Promise<WorkspaceInpu
   }
 
   const workspacePath = await mkdtemp(join(tmpdir(), "ai-context-governance-"));
+  let projectWorkspacePath = workspacePath;
   try {
     const zip = new AdmZip(sourcePath);
     validateZipArchive(zip, sourcePath);
     zip.extractAllTo(workspacePath, true);
+    projectWorkspacePath = await resolveExtractedProjectRoot(workspacePath);
   } catch (error) {
     await rm(workspacePath, { recursive: true, force: true });
     throw error;
@@ -35,11 +37,27 @@ export async function prepareWorkspace(inputPath: string): Promise<WorkspaceInpu
 
   return {
     sourcePath,
-    workspacePath,
+    workspacePath: projectWorkspacePath,
     cleanup: async () => {
       await rm(workspacePath, { recursive: true, force: true });
     }
   };
+}
+
+async function resolveExtractedProjectRoot(workspacePath: string): Promise<string> {
+  const entries = await readdir(workspacePath, { withFileTypes: true });
+  const visibleEntries = entries.filter((entry) => !entry.name.startsWith("__MACOSX"));
+  if (visibleEntries.length !== 1 || !visibleEntries[0].isDirectory()) {
+    return workspacePath;
+  }
+
+  const candidatePath = join(workspacePath, visibleEntries[0].name);
+  try {
+    const packageJson = await stat(join(candidatePath, "package.json"));
+    return packageJson.isFile() ? candidatePath : workspacePath;
+  } catch {
+    return workspacePath;
+  }
 }
 
 function validateZipArchive(zip: AdmZip, sourcePath: string): void {

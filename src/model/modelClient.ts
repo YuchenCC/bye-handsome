@@ -6,10 +6,19 @@ const GOVERNANCE_MODEL_PURPOSES = [
   "user-skill"
 ] as const;
 
+const GOVERNANCE_MODEL_OUTPUT_KINDS = [
+  "markdown-doc",
+  "json-index",
+  "context-policy",
+  "user-skill"
+] as const;
+
 export type GovernanceModelPurpose = (typeof GOVERNANCE_MODEL_PURPOSES)[number];
+export type GovernanceModelOutputKind = (typeof GOVERNANCE_MODEL_OUTPUT_KINDS)[number];
 
 export interface ModelRequest {
   purpose: GovernanceModelPurpose;
+  outputKind: GovernanceModelOutputKind;
   system: string;
   input: unknown;
 }
@@ -19,7 +28,15 @@ export interface ModelClient {
 }
 
 export function createModelClient(options: ModelOptions): ModelClient {
-  if (options.provider && options.model && options.baseUrl && options.apiKey) {
+  const apiConfigFields = [options.provider, options.model, options.baseUrl, options.apiKey];
+  const hasAnyApiConfig = apiConfigFields.some((value) => value !== undefined);
+  const hasAllApiConfig = apiConfigFields.every((value) => value !== undefined);
+
+  if (hasAnyApiConfig && !hasAllApiConfig) {
+    throw new Error("Configured API model requires provider, model, baseUrl, and apiKey");
+  }
+
+  if (hasAllApiConfig) {
     return new ConfiguredApiModelClient(options);
   }
 
@@ -38,11 +55,24 @@ export function assertGovernanceModelPurpose(
   }
 }
 
+export function assertGovernanceModelOutputKind(
+  outputKind: string
+): asserts outputKind is GovernanceModelOutputKind {
+  if (!GOVERNANCE_MODEL_OUTPUT_KINDS.includes(outputKind as GovernanceModelOutputKind)) {
+    throw new Error(`Blocked out-of-scope model output kind: ${outputKind}`);
+  }
+}
+
+function assertGovernanceModelRequest(request: ModelRequest): void {
+  assertGovernanceModelPurpose(request.purpose);
+  assertGovernanceModelOutputKind(request.outputKind);
+}
+
 class ConfiguredApiModelClient implements ModelClient {
   constructor(private readonly options: ModelOptions) {}
 
   async generateText(request: ModelRequest): Promise<string> {
-    assertGovernanceModelPurpose(request.purpose);
+    assertGovernanceModelRequest(request);
 
     const response = await fetch(`${this.options.baseUrl!.replace(/\/$/, "")}/chat/completions`, {
       method: "POST",
@@ -77,7 +107,7 @@ class ConfiguredApiModelClient implements ModelClient {
 
 class CurrentSessionModelClient implements ModelClient {
   async generateText(request: ModelRequest): Promise<string> {
-    assertGovernanceModelPurpose(request.purpose);
+    assertGovernanceModelRequest(request);
     throw new Error(
       `Current-session model task requires interactive handling. Purpose: ${request.purpose}`
     );
@@ -86,7 +116,7 @@ class CurrentSessionModelClient implements ModelClient {
 
 class NoopModelClient implements ModelClient {
   async generateText(request: ModelRequest): Promise<string> {
-    assertGovernanceModelPurpose(request.purpose);
+    assertGovernanceModelRequest(request);
     throw new Error(`No model configured for governance task: ${request.purpose}`);
   }
 }

@@ -1,0 +1,17 @@
+{
+  "change": "skill-driven-context-governance-prd",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "3d73508a564eb6a14ce029cf790943b5703585da00b4bdfa38469dc92669c636",
+  "files": [
+    { "path": "openspec/changes/skill-driven-context-governance-prd/proposal.md", "sha256": "715a58c53a05da4818b72a6084b3cf8f3fa09387b4236fd8616a0c60d9352f2f" },
+    { "path": "openspec/changes/skill-driven-context-governance-prd/design.md", "sha256": "d0040a7193c57e0fd1b49501eca3864efc9fa2c66cf95b1607623146d43fbe32" },
+    { "path": "openspec/changes/skill-driven-context-governance-prd/tasks.md", "sha256": "9581e34e5a08d6b138d17ea28a4d79d309b15f0b99656237bc1b3e867cd4d8da" },
+    { "path": "openspec/changes/skill-driven-context-governance-prd/specs/evidence-package-generation/spec.md", "sha256": "c62de9ba367b4613105f099a358d8a895188998a3b0a9559f21c840b53c93501" },
+    { "path": "openspec/changes/skill-driven-context-governance-prd/specs/generated-ai-coding-guide-skill/spec.md", "sha256": "15ce7cdad8b618c812ca52f99e37b23655409a4d17de01be940c176754cefc65" },
+    { "path": "openspec/changes/skill-driven-context-governance-prd/specs/governance-skill-registry/spec.md", "sha256": "ac353d110304d0e4158a4e9b8e27c9beff4f53645ebed5ec0e1f8cc0dc3e2f56" },
+    { "path": "openspec/changes/skill-driven-context-governance-prd/specs/model-assisted-context-generation/spec.md", "sha256": "5f0c431ba252a24aadc6539d3443b8fc96974547c3be5d64f27965f6fa960452" }
+  ]
+}

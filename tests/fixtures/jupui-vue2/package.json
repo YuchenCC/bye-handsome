@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "vue": "^2.7.0",
+    "jupui": "^1.0.0",
+    "@vue/cli-service": "^5.0.0"
+  }
+}

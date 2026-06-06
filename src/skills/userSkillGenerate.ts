@@ -107,15 +107,6 @@ Use this Skill inside the target project after copying \`.ai-index\`, \`.ai-cont
 - \`.ai-context\`
 - \`docs/ai\`
 
-## plan-do Workflow
-
-1. Parse the user request and classify it as create list page, modify existing page, connect API, or fix error.
-2. Extract required fields. If page, route, API, component, or business field information is missing, ask for confirmation.
-3. Retrieve relevant files from \`.ai-index\` and policies from \`.ai-context\`.
-4. Produce a concise implementation plan and wait for user confirmation.
-5. Generate a Qwen2.5-Coder-32B prompt with only the minimal necessary context.
-6. After code is applied, run changed-file ESLint checks and generate a constrained repair prompt when needed.
-
 ## Supported MVP Task Types
 
 - Create list page
@@ -123,9 +114,50 @@ Use this Skill inside the target project after copying \`.ai-index\`, \`.ai-cont
 - Connect API
 - Fix error
 
+## plan-do Workflow
+
+1. Parse the user request and classify it as create list page, modify existing page, connect API, or fix error.
+2. Extract required fields. If page, route, API, component, business fields, permissions, dictionaries, or route information is missing, ask for confirmation.
+3. Retrieve relevant files from \`.ai-index\`, policies from \`.ai-context\`, and human-readable context from \`docs/ai\`.
+4. Produce a concise implementation plan and wait for user confirmation.
+5. Generate a Qwen2.5-Coder-32B prompt with only the minimal necessary context.
+6. After code is applied, run changed-file ESLint checks and generate a constrained repair prompt when needed.
+
+## Context Retrieval
+
+Read context in this order:
+
+1. \`.ai-index/project-profile.json\` for stack, commands, request layer, source dirs, and quality hints.
+2. \`.ai-index/pages.json\`, \`.ai-index/components.json\`, \`.ai-index/apis.json\`, and \`.ai-index/routes.json\` for task-relevant candidates.
+3. \`.ai-index/templates.json\` and \`.ai-index/examples.json\` for reusable examples.
+4. \`.ai-index/rules.json\` and \`.ai-context/qwen32b-context-policy.md\` for constraints.
+5. Relevant \`docs/ai\` files for human-readable project conventions.
+
+Only include context directly relevant to the requested task. Do not inject all documents or all source code.
+
+## Missing Information Confirmation
+
+Before producing the final prompt, confirm missing or ambiguous page, route, API, component, business fields, permissions, dictionaries.
+
+Ask the user for clarification when:
+
+- The target page or module cannot be matched from \`.ai-index/pages.json\`.
+- The target route is missing or marked as \`待确认\`.
+- The API method, path, request params, or response shape is not present in \`.ai-index/apis.json\`.
+- A component, permission, dictionary, or business field is requested but not present in retrieved context.
+- The requested task implies new dependencies, new request wrappers, or broad refactoring.
+
 ## Qwen32B Prompt Output Format
 
-The generated prompt must include task summary, confirmed fields, retrieved context, constraints, expected changed files, and quality checks.
+The generated prompt must include:
+
+- Task Summary
+- Confirmed Fields
+- Retrieved Context
+- Constraints
+- Expected Changed Files
+- Quality Checks
+- Remaining TODO Fields
 
 ## Small Model Constraints
 
@@ -134,9 +166,13 @@ The generated prompt must include task summary, confirmed fields, retrieved cont
 不得编造项目中不存在的组件。
 不得编造接口方法。
 不得绕过项目既有 request wrapper。
+不得编造权限、字典或业务字段。
+不得猜测后端接口入参和出参。
 字段不确定时必须使用 TODO。
 不得修改无关文件。
 不得进行未请求的大重构。
+必须输出待确认事项。
+必须输出变更文件 ESLint 回检建议。
 
 ## Changed-file ESLint Flow
 
@@ -144,9 +180,26 @@ Inspect changed \`.js\`, \`.jsx\`, \`.ts\`, \`.tsx\`, and \`.vue\` files only. P
     .map(([name, command]) => `${name}: ${command}`)
     .join("; ") || "待确认"}.
 
+Use changed-file detection commands:
+
+\`\`\`bash
+git diff --name-only --diff-filter=ACMRTUXB
+git diff --cached --name-only --diff-filter=ACMRTUXB
+\`\`\`
+
+Filter to frontend source files only before running ESLint.
+
 ## Repair Prompt Flow
 
 When ESLint reports errors, summarize file, rule, line, and message. The repair prompt must only fix reported errors and must keep the original task scope.
+
+The repair prompt must include:
+
+- Original task summary
+- Changed files with ESLint errors
+- Rule, line, and message for each error
+- Constraint that only reported ESLint errors may be fixed
+- Constraint that unrelated files and behavior must not change
 `;
 }
 

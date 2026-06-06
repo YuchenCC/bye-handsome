@@ -328,7 +328,7 @@ git commit -m "Add model-assisted context generation"
 - Test: `tests/userSkillGenerate.test.ts`
 - Update: `openspec/changes/skill-driven-context-governance-prd/tasks.md`
 
-- [ ] **Step 1: Write failing generated Skill tests**
+- [x] **Step 1: Write failing generated Skill tests**
 
 Update tests to assert `SKILL.md` includes:
 
@@ -347,7 +347,7 @@ npx vitest run tests/userSkillGenerate.test.ts
 
 Expected: FAIL on missing sections.
 
-- [ ] **Step 2: Rewrite generated Skill content**
+- [x] **Step 2: Rewrite generated Skill content**
 
 Make `renderSkill(profile)` produce a workflow-oriented Skill with concrete sections:
 
@@ -362,7 +362,7 @@ Make `renderSkill(profile)` produce a workflow-oriented Skill with concrete sect
 - Changed-file ESLint flow.
 - Repair prompt flow.
 
-- [ ] **Step 3: Verify and commit**
+- [x] **Step 3: Verify and commit**
 
 Run:
 

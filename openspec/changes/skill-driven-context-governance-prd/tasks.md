@@ -30,12 +30,12 @@
 
 ## 5. Generated User AI Coding Guide Skill
 
-- [ ] 5.1 将生成的 `.ai-skill/ai-coding-guide/SKILL.md` 改写为可执行的模型/Agent 工作流。
-- [ ] 5.2 增加 `.ai-index`、`.ai-context` 和相关 `docs/ai` 文件的上下文召回说明。
-- [ ] 5.3 增加任务类型、页面、路由、API、组件、业务字段、权限和字典的缺失信息确认规则。
-- [ ] 5.4 扩展小模型约束，覆盖编造权限、字典、业务字段，以及猜测 API 入参/出参契约。
-- [ ] 5.5 增加变更文件识别和 ESLint 回修 prompt 指导。
-- [ ] 5.6 增加测试，覆盖生成 Skill 内容和必需工作流章节。
+- [x] 5.1 将生成的 `.ai-skill/ai-coding-guide/SKILL.md` 改写为可执行的模型/Agent 工作流。
+- [x] 5.2 增加 `.ai-index`、`.ai-context` 和相关 `docs/ai` 文件的上下文召回说明。
+- [x] 5.3 增加任务类型、页面、路由、API、组件、业务字段、权限和字典的缺失信息确认规则。
+- [x] 5.4 扩展小模型约束，覆盖编造权限、字典、业务字段，以及猜测 API 入参/出参契约。
+- [x] 5.5 增加变更文件识别和 ESLint 回修 prompt 指导。
+- [x] 5.6 增加测试，覆盖生成 Skill 内容和必需工作流章节。
 
 ## 6. Documentation and Verification
 

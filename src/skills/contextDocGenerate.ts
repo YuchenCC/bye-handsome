@@ -13,6 +13,7 @@ import {
   renderSystemProfile,
   renderUserGuide
 } from "../generators/templates.js";
+import { writeGovernanceSkillRegistry } from "./registry.js";
 
 export interface ContextDocGenerateOptions {
   outputPath: string;
@@ -90,6 +91,7 @@ export async function contextDocGenerateSkill(options: ContextDocGenerateOptions
     writePackageFile(options.outputPath, ".ai-context/qwen32b-context-policy.md", renderQwenPolicy()),
     writePackageFile(options.outputPath, ".ai-context/output-format.md", renderQwenOutputFormat()),
     writePackageFile(options.outputPath, ".ai-context/plan-do-policy.md", renderPlanDoPolicy()),
-    writePackageFile(options.outputPath, ".ai-context/quality-check-policy.md", renderQualityCheckPolicy())
+    writePackageFile(options.outputPath, ".ai-context/quality-check-policy.md", renderQualityCheckPolicy()),
+    writeGovernanceSkillRegistry(options.outputPath)
   ]);
 }

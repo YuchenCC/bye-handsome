@@ -1,9 +1,9 @@
 ## 1. Skill Registry
 
-- [ ] 1.1 定义治理 Skill 元数据类型，包含 name、purpose、inputs、outputs、model requirement、allowed actions、forbidden actions、validation policy 和 failure policy。
-- [ ] 1.2 实现 registry 生成器，列出项目识别、源码清单、示例/模板抽取、上下文文档生成、Qwen 策略生成、治理报告生成和用户 AI Coding 引导 Skill 生成。
-- [ ] 1.3 使用稳定路径和稳定格式将 registry 写入上下文资料包。
-- [ ] 1.4 增加测试，验证必需 Skills 和业务 patch 禁止项存在于 registry 中。
+- [x] 1.1 定义治理 Skill 元数据类型，包含 name、purpose、inputs、outputs、model requirement、allowed actions、forbidden actions、validation policy 和 failure policy。
+- [x] 1.2 实现 registry 生成器，列出项目识别、源码清单、示例/模板抽取、上下文文档生成、Qwen 策略生成、治理报告生成和用户 AI Coding 引导 Skill 生成。
+- [x] 1.3 使用稳定路径和稳定格式将 registry 写入上下文资料包。
+- [x] 1.4 增加测试，验证必需 Skills 和业务 patch 禁止项存在于 registry 中。
 
 ## 2. Evidence Package
 

@@ -1,8 +1,8 @@
 workflow: full
 phase: build
-build_mode: null
-build_pause: plan-ready
-isolation: null
+build_mode: executing-plans
+build_pause: null
+isolation: branch
 verify_mode: null
 base_ref: ef6495b4756a35447c2e50680fcba375797ce746
 design_doc: docs/superpowers/specs/2026-06-06-skill-driven-context-governance-design.md

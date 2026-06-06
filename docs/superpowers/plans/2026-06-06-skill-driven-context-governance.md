@@ -39,7 +39,7 @@ base-ref: e2aae2653445f174f107c13d12e2b34ca9e3991f
 - Test: `tests/governanceSkillRegistry.test.ts`
 - Update: `openspec/changes/skill-driven-context-governance-prd/tasks.md`
 
-- [ ] **Step 1: Write failing registry tests**
+- [x] **Step 1: Write failing registry tests**
 
 Create `tests/governanceSkillRegistry.test.ts` with assertions for required Skill names, metadata fields, JSON output, Markdown output, and forbidden business patch/source modification actions.
 
@@ -51,7 +51,7 @@ npx vitest run tests/governanceSkillRegistry.test.ts
 
 Expected: FAIL because `src/skills/registry.ts` does not exist.
 
-- [ ] **Step 2: Implement registry types and default entries**
+- [x] **Step 2: Implement registry types and default entries**
 
 Create `src/skills/registry.ts` with a `GovernanceSkillDefinition` interface, `createGovernanceSkillRegistry()`, `renderSkillRegistryMarkdown()`, and `writeGovernanceSkillRegistry(outputPath)`.
 
@@ -71,7 +71,7 @@ Required names:
 
 Each model-capable Skill must include forbidden actions for `business source-code patch generation` and `scanned project source modification`.
 
-- [ ] **Step 3: Write registry into the package**
+- [x] **Step 3: Write registry into the package**
 
 Update `contextDocGenerateSkill` to write:
 
@@ -82,7 +82,7 @@ governance-skills/SKILL_REGISTRY.md
 
 Use existing `writePackageJson` and `writePackageFile`.
 
-- [ ] **Step 4: Verify and commit**
+- [x] **Step 4: Verify and commit**
 
 Run:
 

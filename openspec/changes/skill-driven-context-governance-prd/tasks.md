@@ -7,11 +7,11 @@
 
 ## 2. Evidence Package
 
-- [ ] 2.1 定义 evidence package schema，包含项目画像、source dirs、文件树摘要、候选清单、代码片段和待确认项。
-- [ ] 2.2 将 scanner 输出改造成有边界的 evidence，同时保留当前基础扫描行为。
-- [ ] 2.3 为代码片段选择增加文件数量、字节数或行数限制。
-- [ ] 2.4 持久化路由、API、组件 props、request wrapper、权限、字典和模板相关的待确认项。
-- [ ] 2.5 增加测试，覆盖 evidence package 结构、有边界 snippets 和待确认项输出。
+- [x] 2.1 定义 evidence package schema，包含项目画像、source dirs、文件树摘要、候选清单、代码片段和待确认项。
+- [x] 2.2 将 scanner 输出改造成有边界的 evidence，同时保留当前基础扫描行为。
+- [x] 2.3 为代码片段选择增加文件数量、字节数或行数限制。
+- [x] 2.4 持久化路由、API、组件 props、request wrapper、权限、字典和模板相关的待确认项。
+- [x] 2.5 增加测试，覆盖 evidence package 结构、有边界 snippets 和待确认项输出。
 
 ## 3. Model-Assisted Generation
 

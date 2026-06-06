@@ -110,7 +110,7 @@ git commit -m "Add governance skill registry"
 - Test: `tests/evidencePackage.test.ts`
 - Update: `openspec/changes/skill-driven-context-governance-prd/tasks.md`
 
-- [ ] **Step 1: Write failing evidence tests**
+- [x] **Step 1: Write failing evidence tests**
 
 Create tests that build evidence from the existing fixture projects and verify:
 
@@ -128,7 +128,7 @@ npx vitest run tests/evidencePackage.test.ts
 
 Expected: FAIL because evidence package code does not exist.
 
-- [ ] **Step 2: Implement evidence package builder**
+- [x] **Step 2: Implement evidence package builder**
 
 Create `buildEvidencePackage({ profile, inventory, templates })`.
 
@@ -144,7 +144,7 @@ const DEFAULT_SNIPPET_LIMITS = {
 
 Initial snippets may be empty or derived from candidate file metadata if full snippet extraction is deferred, but limits and schema must exist.
 
-- [ ] **Step 3: Persist evidence**
+- [x] **Step 3: Persist evidence**
 
 Update `contextDocGenerateSkill` to write:
 
@@ -160,7 +160,7 @@ Update `contextDocGenerateSkill` to write:
 .evidence/unresolved-items.json
 ```
 
-- [ ] **Step 4: Verify and commit**
+- [x] **Step 4: Verify and commit**
 
 Run:
 

@@ -1,4 +1,5 @@
 import type { InventoryResult, ProjectProfile, TemplateExampleResult } from "../agent/types.js";
+import { buildEvidencePackage, writeEvidencePackage } from "../evidence/evidencePackage.js";
 import { writePackageFile, writePackageJson } from "../generators/packageWriter.js";
 import {
   renderAgentUsage,
@@ -28,8 +29,10 @@ export async function contextDocGenerateSkill(options: ContextDocGenerateOptions
     inventory: options.inventory,
     templates: options.templates
   };
+  const evidence = buildEvidencePackage(input);
 
   await Promise.all([
+    writeEvidencePackage(options.outputPath, evidence),
     writePackageFile(options.outputPath, "docs/ai/README_AI.md", renderUserGuide()),
     writePackageFile(options.outputPath, "docs/ai/system-profile.md", renderSystemProfile(input)),
     writePackageFile(

@@ -2,11 +2,11 @@
 
 存量前端系统 AI Coding 上下文治理 Agent 项目。
 
-本项目目标是为旧前端工程生成适配 AI Coding 的上下文资料包。治理 Agent 接收单个源码 zip 或本地项目目录，识别项目技术栈和工程结构，调用对应 Skill 生成中文上下文文档、机器检索索引、Qwen2.5-Coder-32B 上下文策略，以及可复制到目标工程使用的用户 AI Coding 引导 Skill。
+本项目目标是为旧前端工程生成适配 AI Coding 的上下文资料包。治理 Agent 接收单个源码 zip 或本地项目目录，先用确定性扫描器收集 evidence，再通过可编排的治理 Skills 生成中文上下文文档、机器检索索引、Qwen2.5-Coder-32B 上下文策略，以及可复制到目标工程使用的用户 AI Coding 引导 Skill。
 
 ## 项目定位
 
-治理 Agent 只负责上下文治理，不直接调用 Qwen2.5-Coder-32B 生成业务代码，也不修改用户业务工程。生成完成后，用户将上下文资料包复制到自己的工程目录，再通过用户 AI Coding 引导 Skill 配合 Qwen2.5-Coder-32B 进行受控代码生成。
+治理 Agent 只负责上下文治理，不直接调用 Qwen2.5-Coder-32B 生成业务代码，也不修改用户业务工程。模型只允许参与上下文文档、策略、治理报告和用户 Skill 的生成。生成完成后，用户将上下文资料包复制到自己的工程目录，再通过用户 AI Coding 引导 Skill 配合 Qwen2.5-Coder-32B 进行受控代码生成。
 
 ## MVP 范围
 
@@ -34,6 +34,8 @@
 ```text
 ai-context-package/
   docs/ai/
+  .evidence/
+  governance-skills/
   .ai-index/
   .ai-context/
   .ai-skill/ai-coding-guide/
@@ -42,6 +44,8 @@ ai-context-package/
 其中：
 
 - `docs/ai/`：中文人读上下文文档。
+- `.evidence/`：确定性扫描得到的项目事实、候选清单、代码片段边界和待确认项。
+- `governance-skills/`：可供模型或 Agent 编排的治理 Skill registry。
 - `.ai-index/`：用户引导 Skill 检索和拼接上下文用的 JSON 索引。
 - `.ai-context/`：Qwen2.5-Coder-32B 的固定规则、输出格式、plan-do 策略和小模型约束。
 - `.ai-skill/ai-coding-guide/`：可复制到目标工程使用的用户 AI Coding 引导 Skill。
@@ -73,21 +77,26 @@ npx ai-context-governance \
 npx ai-context-governance --input ./path/to/project --current-session-model
 ```
 
-当前实现会将 current-session model 模式作为交互式处理边界；未配置模型时不会伪造模型输出。
+当前实现会将 current-session model 模式作为交互式处理边界；未配置模型时会生成确定性 fallback 输出，并在对应产物中明确标记“确定性 fallback 输出”，不会伪装成模型归纳结果。
 
 ## Skill 架构
 
-采用治理 Agent 中心化编排 + 中等粒度 Skill：
+采用治理 Agent 中心化编排 + 中等粒度 Skill。Node 扫描器负责收集 evidence，治理 Skills 负责声明输入、输出、允许动作、禁止动作、校验策略和失败策略：
 
 - `project-detect-skill`：识别技术栈、依赖、构建工具、目录、命令和规范。
 - `source-inventory-skill`：扫描页面、路由、组件、接口等基础清单。
 - `example-template-skill`：抽取典型页面、组件、service、权限、字典等示例和模板。
-- `context-doc-generate-skill`：生成 `docs/ai`、`.ai-index`、`.ai-context`。
+- `context-doc-generate-skill`：基于 evidence 生成 `docs/ai`、`.ai-index`、`.ai-context`。
+- `qwen-context-policy-generate-skill`：生成 Qwen32B 上下文选择、输出格式、plan-do 和质量回检策略。
+- `governance-report-generate-skill`：汇总扫描结果、模型生成状态、异常和待确认项。
 - `user-ai-coding-skill-generate-skill`：生成用户 AI Coding 引导 Skill。
+
+所有治理 Skills 都禁止生成业务源码 patch 或修改被扫描项目源码。
 
 ## 当前文档
 
 - [需求说明书](docs/superpowers/specs/2026-06-06-ai-context-governance-agent-requirements.md)
+- [Skill 驱动上下文治理设计](docs/superpowers/specs/2026-06-06-skill-driven-context-governance-design.md)
 - [PRD 初稿](prd/Qwen2.5-Coder-32B%20AI%20Coding%20上下文治理%20PRD.pdf)
 
 ## 开发说明

@@ -94,14 +94,22 @@ npx ai-context-governance --input ./path/to/project --output ./ai-context-packag
 ## 输出解释
 
 - \`docs/ai\`：中文上下文文档。
+- \`.evidence\`：确定性扫描得到的项目事实、候选清单、代码片段边界和待确认项。
+- \`governance-skills\`：治理 Skill registry，列出可编排 Skill、输入输出、允许动作、禁止动作、校验策略和失败策略。
 - \`.ai-index\`：机器检索索引。
 - \`.ai-context\`：Qwen32B 上下文和输出策略。
 - \`.ai-skill/ai-coding-guide\`：复制到目标工程后使用的 AI Coding 引导 Skill。
 - \`docs/ai/governance-report.md\`：扫描结果、缺失信息和待确认项。
 
+## 模型辅助与 fallback
+
+显式配置模型时，治理 Agent 会通过受控模型调用生成上下文文档、Qwen 策略、治理报告和用户引导 Skill。模型输入只使用有边界的 evidence package，不注入全项目源码。
+
+未配置模型或 current-session model 需要交互式处理时，治理 Agent 会生成确定性 fallback 输出，并在产物中标记“确定性 fallback 输出”。
+
 ## 复制流程
 
-治理 Agent 只生成独立上下文包，不修改被扫描源码。确认治理报告后，将需要的上下文目录复制到目标工程，再使用生成的用户 AI Coding guide Skill。
+治理 Agent 只生成独立上下文包，不修改被扫描源码。确认治理报告后，将 \`.ai-index\`、\`.ai-context\`、\`docs/ai\` 和 \`.ai-skill/ai-coding-guide\` 复制到目标工程，再使用生成的用户 AI Coding guide Skill。
 
 ## 故障处理
 

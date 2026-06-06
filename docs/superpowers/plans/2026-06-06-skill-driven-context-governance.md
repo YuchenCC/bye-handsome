@@ -387,7 +387,7 @@ git commit -m "Strengthen generated AI coding guide skill"
 - Modify: `src/generators/templates.ts`
 - Modify: `openspec/changes/skill-driven-context-governance-prd/tasks.md`
 
-- [ ] **Step 1: Update docs**
+- [x] **Step 1: Update docs**
 
 Update README and generated Agent usage documentation to explain:
 
@@ -398,11 +398,11 @@ Update README and generated Agent usage documentation to explain:
 - Deterministic fallback behavior.
 - Target-project AI Coding usage.
 
-- [ ] **Step 2: Mark OpenSpec tasks complete**
+- [x] **Step 2: Mark OpenSpec tasks complete**
 
 Update `openspec/changes/skill-driven-context-governance-prd/tasks.md` so completed implementation tasks are checked.
 
-- [ ] **Step 3: Run full verification**
+- [x] **Step 3: Run full verification**
 
 Run:
 
@@ -414,7 +414,7 @@ npm run build
 
 Expected: all commands PASS.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 Commit:
 

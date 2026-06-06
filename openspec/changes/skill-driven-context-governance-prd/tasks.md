@@ -39,7 +39,7 @@
 
 ## 6. Documentation and Verification
 
-- [ ] 6.1 更新 README，说明 Skill 驱动的治理模型和确定性 fallback 行为。
-- [ ] 6.2 更新 Agent 使用文档，区分 evidence collection、治理 Skills、模型辅助生成和目标工程 AI Coding 使用。
-- [ ] 6.3 运行完整测试套件和 TypeScript 校验。
-- [ ] 6.4 根据本 change 的 specs 审查生成产物，再标记实现完成。
+- [x] 6.1 更新 README，说明 Skill 驱动的治理模型和确定性 fallback 行为。
+- [x] 6.2 更新 Agent 使用文档，区分 evidence collection、治理 Skills、模型辅助生成和目标工程 AI Coding 使用。
+- [x] 6.3 运行完整测试套件和 TypeScript 校验。
+- [x] 6.4 根据本 change 的 specs 审查生成产物，再标记实现完成。

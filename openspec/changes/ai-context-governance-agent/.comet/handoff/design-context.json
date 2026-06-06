@@ -1,0 +1,19 @@
+{
+  "change": "ai-context-governance-agent",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "4d97a5099333fb2c3f4919803bf2c240ada7fe2e24a37e6e62deca1f451f9f42",
+  "files": [
+    { "path": "openspec/changes/ai-context-governance-agent/proposal.md", "sha256": "8a777e6fad27f08e1a6a7871fff20190bc04d5ba16e44cdb5b21eceae3003783" },
+    { "path": "openspec/changes/ai-context-governance-agent/design.md", "sha256": "a557ffac883d5ea905797995e967072e1257f675e5bd35f5d8bab307cefb3987" },
+    { "path": "openspec/changes/ai-context-governance-agent/tasks.md", "sha256": "fb6f40a46eecc783f0338a9fdb43316e38fdc936f8fcbd351a46fbc77cbc2c01" },
+    { "path": "openspec/changes/ai-context-governance-agent/specs/agent-usage-documentation/spec.md", "sha256": "624b11d0b3166559fb0d6af8e44495a8766021554bcf7cd4e9a5cf59bac52350" },
+    { "path": "openspec/changes/ai-context-governance-agent/specs/context-generation-skills/spec.md", "sha256": "ee7c1b789ce680912f59bf2b369b9af14e180f3ec73ab237f1d22dab9ef089ef" },
+    { "path": "openspec/changes/ai-context-governance-agent/specs/context-governance-agent/spec.md", "sha256": "a6c6913821991503523f25349abee3f17d0535c10bbd0b25dbc07bc469f1d52b" },
+    { "path": "openspec/changes/ai-context-governance-agent/specs/context-package-output/spec.md", "sha256": "d0d51be1b6e8361119d5d9caa317c923a2d7a88dbfe9fa7290a2a2a835c9a864" },
+    { "path": "openspec/changes/ai-context-governance-agent/specs/controlled-model-invocation/spec.md", "sha256": "02a9f4961bf253726373d922ee7c5da805161d4e8176efdb4c95f86a462aeecf" },
+    { "path": "openspec/changes/ai-context-governance-agent/specs/user-ai-coding-guide-skill/spec.md", "sha256": "1a88e58bd99f1f63f424f58cf17a22c6c9e09bb0d23abeaec3eb4be35ae88520" }
+  ]
+}

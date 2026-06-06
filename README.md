@@ -46,6 +46,35 @@ ai-context-package/
 - `.ai-context/`：Qwen2.5-Coder-32B 的固定规则、输出格式、plan-do 策略和小模型约束。
 - `.ai-skill/ai-coding-guide/`：可复制到目标工程使用的用户 AI Coding 引导 Skill。
 
+## CLI 使用
+
+构建后可以对本地项目目录或源码 zip 生成上下文资料包：
+
+```bash
+npm run build
+npx ai-context-governance --input ./path/to/project --output ./ai-context-package
+```
+
+显式配置模型时传入 provider、model、base URL 和 API key：
+
+```bash
+npx ai-context-governance \
+  --input ./path/to/project \
+  --output ./ai-context-package \
+  --model-provider openai-compatible \
+  --model qwen \
+  --base-url https://model.example/v1 \
+  --api-key "$MODEL_API_KEY"
+```
+
+如需使用当前交互会话内的模型能力，可传入：
+
+```bash
+npx ai-context-governance --input ./path/to/project --current-session-model
+```
+
+当前实现会将 current-session model 模式作为交互式处理边界；未配置模型时不会伪造模型输出。
+
 ## Skill 架构
 
 采用治理 Agent 中心化编排 + 中等粒度 Skill：
@@ -75,3 +104,10 @@ npm install
 npx openspec --help
 ```
 
+常用验证命令：
+
+```bash
+npm test
+npm run build
+npx openspec validate ai-context-governance-agent
+```

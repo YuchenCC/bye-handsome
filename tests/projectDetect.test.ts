@@ -63,7 +63,11 @@ describe("projectDetectSkill", () => {
       dependencies: {
         react: "^18.2.0",
         vite: "^5.0.0",
-        antd: "^5.0.0"
+        antd: "^5.0.0",
+        axios: "^1.0.0",
+        "react-router-dom": "^6.0.0",
+        tailwindcss: "^3.0.0",
+        eslint: "^9.0.0"
       }
     });
 
@@ -73,6 +77,10 @@ describe("projectDetectSkill", () => {
     expect(profile.stackEvidence).toEqual(["dependency:react"]);
     expect(profile.buildTool).toBe("vite");
     expect(profile.uiFrameworks).toEqual(["antd"]);
+    expect(profile.requestLayer).toBe("axios");
+    expect(profile.routeStyle).toBe("react-router");
+    expect(profile.styleSystem).toBe("tailwindcss");
+    expect(profile.qualityConfig).toEqual(["eslint"]);
   });
 
   it("detects Umi projects with priority over React signals", async () => {

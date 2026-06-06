@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "dev": "umi dev",
+    "build": "umi build"
+  },
+  "dependencies": {
+    "@umijs/max": "^4.0.0",
+    "react": "^18.2.0"
+  }
+}

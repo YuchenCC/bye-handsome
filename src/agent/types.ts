@@ -26,6 +26,10 @@ export interface ProjectProfile {
   stackEvidence: string[];
   buildTool?: string;
   uiFrameworks: string[];
+  requestLayer?: string;
+  routeStyle?: string;
+  styleSystem?: string;
+  qualityConfig: string[];
   commands: Record<string, string>;
   packageManager?: string;
   sourceDirs: string[];
@@ -37,6 +41,8 @@ export interface InventoryResult {
   components: InventoryComponent[];
   apis: InventoryApi[];
   routes: InventoryRoute[];
+  requestWrappers: InventoryRequestWrapper[];
+  pageApiRelations: InventoryPageApiRelation[];
   confirmationItems: string[];
 }
 
@@ -65,6 +71,17 @@ export interface InventoryRoute {
   name?: string;
   routePath: string;
   filePath: string;
+}
+
+export interface InventoryRequestWrapper {
+  name: string;
+  filePath: string;
+}
+
+export interface InventoryPageApiRelation {
+  pageFilePath: string;
+  apiFilePath: string;
+  confidence: "name-match";
 }
 
 export interface TemplateExampleResult {

@@ -28,6 +28,10 @@ export async function scanProjectProfile(root: string): Promise<ProjectProfile> 
     stackEvidence: stackResult.evidence,
     buildTool: detectBuildTool(depNames),
     uiFrameworks,
+    requestLayer: detectRequestLayer(depNames),
+    routeStyle: detectRouteStyle(depNames),
+    styleSystem: detectStyleSystem(depNames),
+    qualityConfig: detectQualityConfig(depNames),
     commands: packageJson.scripts ?? {},
     packageManager: "npm",
     sourceDirs: ["src"],
@@ -75,4 +79,34 @@ function detectBuildTool(depNames: string[]): string | undefined {
   if (depNames.includes("@vue/cli-service")) return "vue-cli";
   if (depNames.includes("umi") || depNames.includes("@umijs/max")) return "umi";
   return undefined;
+}
+
+function detectRequestLayer(depNames: string[]): string | undefined {
+  if (depNames.includes("axios")) return "axios";
+  if (depNames.includes("umi-request")) return "umi-request";
+  if (depNames.includes("@umijs/request")) return "@umijs/request";
+  return undefined;
+}
+
+function detectRouteStyle(depNames: string[]): string | undefined {
+  if (depNames.includes("vue-router")) return "vue-router";
+  if (depNames.includes("react-router") || depNames.includes("react-router-dom")) {
+    return "react-router";
+  }
+  if (depNames.includes("umi") || depNames.includes("@umijs/max")) return "umi";
+  return undefined;
+}
+
+function detectStyleSystem(depNames: string[]): string | undefined {
+  if (depNames.includes("tailwindcss")) return "tailwindcss";
+  if (depNames.includes("sass") || depNames.includes("node-sass")) return "sass";
+  if (depNames.includes("less")) return "less";
+  if (depNames.includes("styled-components")) return "styled-components";
+  return undefined;
+}
+
+function detectQualityConfig(depNames: string[]): string[] {
+  return depNames.filter((name) =>
+    ["eslint", "prettier", "stylelint", "typescript"].includes(name)
+  );
 }

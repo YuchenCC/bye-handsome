@@ -1,5 +1,25 @@
 {
+  "type": "module",
+  "bin": {
+    "ai-context-governance": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "dev": "tsx src/cli/index.ts",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
   "dependencies": {
-    "@fission-ai/openspec": "^1.4.1"
+    "@fission-ai/openspec": "^1.4.1",
+    "adm-zip": "^0.5.17",
+    "commander": "^15.0.0",
+    "fast-glob": "^3.3.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
   }
 }

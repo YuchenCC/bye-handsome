@@ -1,9 +1,16 @@
 import type { ProjectProfile } from "../agent/types.js";
 import { writePackageFile } from "../generators/packageWriter.js";
+import type { ModelClient } from "../model/modelClient.js";
+import {
+  assertNoBusinessPatchContent,
+  validateMarkdownSections,
+  withFallbackMarker
+} from "../model/outputValidation.js";
 
 export interface UserSkillGenerateOptions {
   outputPath: string;
   profile: ProjectProfile;
+  modelClient?: ModelClient;
 }
 
 const skillRoot = ".ai-skill/ai-coding-guide";
@@ -11,8 +18,9 @@ const skillRoot = ".ai-skill/ai-coding-guide";
 export async function userAiCodingSkillGenerateSkill(
   options: UserSkillGenerateOptions
 ): Promise<void> {
+  const skillContent = await renderSkillWithModel(options);
   await Promise.all([
-    writePackageFile(options.outputPath, `${skillRoot}/SKILL.md`, renderSkill(options.profile)),
+    writePackageFile(options.outputPath, `${skillRoot}/SKILL.md`, skillContent),
     writePackageFile(
       options.outputPath,
       `${skillRoot}/templates/create-list-page.md`,
@@ -39,6 +47,46 @@ export async function userAiCodingSkillGenerateSkill(
       renderEslintCheck(options.profile)
     )
   ]);
+}
+
+async function renderSkillWithModel(options: UserSkillGenerateOptions): Promise<string> {
+  if (!options.modelClient) {
+    return withFallbackMarker(renderSkill(options.profile));
+  }
+
+  try {
+    const markdown = await options.modelClient.generateText({
+      purpose: "user-skill",
+      outputKind: "user-skill",
+      system:
+        "你是上下文治理 Agent。请生成目标工程侧 AI Coding Guide Skill，必须包含 # AI Coding Guide、## plan-do Workflow、## Small Model Constraints、## Changed-file ESLint Flow，不得输出业务源码 patch。",
+      input: {
+        profile: options.profile,
+        requiredContext: [".ai-index", ".ai-context", "docs/ai"]
+      }
+    });
+    validateMarkdownSections(markdown, [
+      "# AI Coding Guide",
+      "## plan-do Workflow",
+      "## Small Model Constraints",
+      "## Changed-file ESLint Flow"
+    ]);
+    assertNoBusinessPatchContent(markdown);
+    return markdown;
+  } catch (error) {
+    if (isModelUnavailable(error)) {
+      return withFallbackMarker(renderSkill(options.profile));
+    }
+    throw error;
+  }
+}
+
+function isModelUnavailable(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.message.includes("No model configured") ||
+      error.message.includes("Current-session model task requires interactive handling"))
+  );
 }
 
 function renderSkill(profile: ProjectProfile): string {

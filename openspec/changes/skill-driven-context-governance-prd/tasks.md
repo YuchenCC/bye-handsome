@@ -15,11 +15,11 @@
 
 ## 3. Model-Assisted Generation
 
-- [ ] 3.1 将 configured model invocation 接入上下文文档、Qwen 策略、治理报告和生成 Skill 的生成路径。
-- [ ] 3.2 无模型配置时保留确定性 fallback 生成，并明确标记 fallback 输出。
-- [ ] 3.3 实现 JSON schema 校验和 Markdown 章节校验，在写入模型生成产物前执行。
-- [ ] 3.4 确保模型请求只使用有边界 evidence，不注入全项目源码。
-- [ ] 3.5 增加测试，覆盖 configured model 生成、fallback 标记、校验拒绝和业务 patch 输出阻断。
+- [x] 3.1 将 configured model invocation 接入上下文文档、Qwen 策略、治理报告和生成 Skill 的生成路径。
+- [x] 3.2 无模型配置时保留确定性 fallback 生成，并明确标记 fallback 输出。
+- [x] 3.3 实现 JSON schema 校验和 Markdown 章节校验，在写入模型生成产物前执行。
+- [x] 3.4 确保模型请求只使用有边界 evidence，不注入全项目源码。
+- [x] 3.5 增加测试，覆盖 configured model 生成、fallback 标记、校验拒绝和业务 patch 输出阻断。
 
 ## 4. Output Package Alignment
 

@@ -262,7 +262,7 @@ git commit -m "Align context package output layout"
 - Test: `tests/modelClient.test.ts`
 - Update: `openspec/changes/skill-driven-context-governance-prd/tasks.md`
 
-- [ ] **Step 1: Write failing model-assisted tests**
+- [x] **Step 1: Write failing model-assisted tests**
 
 Add tests covering:
 
@@ -280,7 +280,7 @@ npx vitest run tests/modelAssistedGeneration.test.ts
 
 Expected: FAIL.
 
-- [ ] **Step 2: Implement Markdown validation**
+- [x] **Step 2: Implement Markdown validation**
 
 Create validators:
 
@@ -290,7 +290,7 @@ Create validators:
 
 Forbidden content checks should catch source patch intent such as `diff --git`, `apply this patch`, and direct scanned-project source modification language.
 
-- [ ] **Step 3: Wire model client into generation path**
+- [x] **Step 3: Wire model client into generation path**
 
 Update `runGovernanceAgent` to create `const modelClient = createModelClient(options.model)` and pass it into generation Skills.
 
@@ -302,7 +302,7 @@ Update generation Skills so configured model calls are attempted only for approv
 
 When `NoopModelClient` throws no-model errors, fall back deterministically with explicit fallback markers.
 
-- [ ] **Step 4: Verify and commit**
+- [x] **Step 4: Verify and commit**
 
 Run:
 

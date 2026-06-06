@@ -16,6 +16,12 @@ import {
   renderTemplateDocs,
   renderUserGuide
 } from "../generators/templates.js";
+import type { ModelClient } from "../model/modelClient.js";
+import {
+  assertNoBusinessPatchContent,
+  validateMarkdownSections,
+  withFallbackMarker
+} from "../model/outputValidation.js";
 import { writeGovernanceSkillRegistry } from "./registry.js";
 
 export interface ContextDocGenerateOptions {
@@ -23,6 +29,7 @@ export interface ContextDocGenerateOptions {
   profile: ProjectProfile;
   inventory: InventoryResult;
   templates: TemplateExampleResult;
+  modelClient?: ModelClient;
 }
 
 export async function contextDocGenerateSkill(options: ContextDocGenerateOptions): Promise<void> {
@@ -32,6 +39,8 @@ export async function contextDocGenerateSkill(options: ContextDocGenerateOptions
     templates: options.templates
   };
   const evidence = buildEvidencePackage(input);
+  const governanceReport = await renderGovernanceReportWithModel(options, evidence);
+  const qwenContextPolicy = await renderQwenPolicyWithModel(options, evidence);
 
   await Promise.all([
     writeEvidencePackage(options.outputPath, evidence),
@@ -64,7 +73,7 @@ export async function contextDocGenerateSkill(options: ContextDocGenerateOptions
     writePackageFile(
       options.outputPath,
       "docs/ai/governance-report.md",
-      renderGovernanceReport(input)
+      governanceReport
     ),
     writePackageFile(options.outputPath, "AGENT_USAGE.md", renderAgentUsage()),
     writePackageJson(options.outputPath, ".ai-index/project-profile.json", options.profile),
@@ -95,10 +104,84 @@ export async function contextDocGenerateSkill(options: ContextDocGenerateOptions
       ]
     }),
     writePackageFile(options.outputPath, ".ai-context/qwen32b-system-prompt.md", renderQwenSystemPrompt()),
-    writePackageFile(options.outputPath, ".ai-context/qwen32b-context-policy.md", renderQwenPolicy()),
+    writePackageFile(options.outputPath, ".ai-context/qwen32b-context-policy.md", qwenContextPolicy),
     writePackageFile(options.outputPath, ".ai-context/qwen32b-output-format.md", renderQwenOutputFormat()),
     writePackageFile(options.outputPath, ".ai-context/qwen32b-plan-do-policy.md", renderPlanDoPolicy()),
     writePackageFile(options.outputPath, ".ai-context/qwen32b-quality-check.md", renderQualityCheckPolicy()),
     writeGovernanceSkillRegistry(options.outputPath)
   ]);
+}
+
+async function renderQwenPolicyWithModel(
+  options: ContextDocGenerateOptions,
+  evidence: ReturnType<typeof buildEvidencePackage>
+): Promise<string> {
+  if (!options.modelClient) {
+    return withFallbackMarker(renderQwenPolicy());
+  }
+
+  try {
+    const markdown = await options.modelClient.generateText({
+      purpose: "context-policy",
+      outputKind: "context-policy",
+      system:
+        "你是上下文治理 Agent。请只基于输入 evidence 生成 Qwen32B 上下文选择策略，必须包含 # Qwen32B Context Policy，必须说明禁止注入全量源码，不得输出业务源码 patch。",
+      input: evidence
+    });
+    validateMarkdownSections(markdown, ["# Qwen32B Context Policy"]);
+    assertNoBusinessPatchContent(markdown);
+    return markdown;
+  } catch (error) {
+    if (isModelUnavailable(error)) {
+      return withFallbackMarker(renderQwenPolicy());
+    }
+    throw error;
+  }
+}
+
+async function renderGovernanceReportWithModel(
+  options: ContextDocGenerateOptions,
+  evidence: ReturnType<typeof buildEvidencePackage>
+): Promise<string> {
+  if (!options.modelClient) {
+    return withFallbackMarker(
+      renderGovernanceReport({
+        profile: options.profile,
+        inventory: options.inventory,
+        templates: options.templates
+      })
+    );
+  }
+
+  try {
+    const markdown = await options.modelClient.generateText({
+      purpose: "documentation",
+      outputKind: "markdown-doc",
+      system:
+        "你是上下文治理 Agent。请只基于输入 evidence 生成中文治理报告，必须包含 # 治理报告、## 扫描结果、## 待人工确认，不得输出业务源码 patch。",
+      input: evidence
+    });
+    validateMarkdownSections(markdown, ["# 治理报告", "## 扫描结果", "## 待人工确认"]);
+    assertNoBusinessPatchContent(markdown);
+    return markdown;
+  } catch (error) {
+    if (isModelUnavailable(error)) {
+      return withFallbackMarker(
+        renderGovernanceReport({
+          profile: options.profile,
+          inventory: options.inventory,
+          templates: options.templates
+        })
+      );
+    }
+    throw error;
+  }
+}
+
+function isModelUnavailable(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.message.includes("No model configured") ||
+      error.message.includes("Current-session model task requires interactive handling"))
+  );
 }

@@ -1,0 +1,17 @@
+{
+  "change": "close-spec-gaps",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "1a2a4c736bd19d25af3fb85ffb1635d257b0f3323bb7f8f3794925111f7a912a",
+  "files": [
+    { "path": "openspec/changes/close-spec-gaps/proposal.md", "sha256": "65b33057aba33050c0cbb5b2558cacebe1a6131cf9f43e231cec06f3355c517c" },
+    { "path": "openspec/changes/close-spec-gaps/design.md", "sha256": "0bda679b5a6ee21c2a1ec6f8453e1397912b96c05c714e8ebe37df8512ac1a2c" },
+    { "path": "openspec/changes/close-spec-gaps/tasks.md", "sha256": "b68890b53180f347150f330e13f459f667d8fec4bb8dbfd54622efc81db309c8" },
+    { "path": "openspec/changes/close-spec-gaps/specs/bounded-evidence-snippets/spec.md", "sha256": "414ce4dedaad72e5531116b9b1cfc4489435b884a530bd0584956a53a9140277" },
+    { "path": "openspec/changes/close-spec-gaps/specs/generation-validation-and-failure-reporting/spec.md", "sha256": "4e73fe2a08bf1de61649c48289c3f8c8145077a175f06dc7d4bb2526072e5521" },
+    { "path": "openspec/changes/close-spec-gaps/specs/qwen-policy-scope-alignment/spec.md", "sha256": "ff9bb104123c88fb1a710e12e2ebd23b3950201a965f46519a41dfccfb6fcdd1" },
+    { "path": "openspec/changes/close-spec-gaps/specs/scanner-semantic-inventory/spec.md", "sha256": "535912b6885f1a1f24fe975d4135581ce4da17e07ebdafd3983d9d8c263a455f" }
+  ]
+}

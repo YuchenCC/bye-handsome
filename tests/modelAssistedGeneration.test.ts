@@ -118,6 +118,38 @@ describe("model-assisted context generation", () => {
     expect(() => assertFallbackMarker(report)).not.toThrow();
   });
 
+
+  it("records invalid model Markdown as failed generation status", async () => {
+    const outputPath = await mkdtemp(join(tmpdir(), "invalid-model-output-test-"));
+    testRoots.push(outputPath);
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: "# Invalid" } }] })
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await contextDocGenerateSkill({
+      outputPath,
+      profile,
+      inventory,
+      templates,
+      modelClient: createModelClient({
+        provider: "openai-compatible",
+        model: "qwen",
+        baseUrl: "https://model.example/v1",
+        apiKey: "secret"
+      })
+    });
+
+    const report = await readFile(join(outputPath, "docs/ai/governance-report.md"), "utf8");
+    expect(report).toContain("Failed 产物");
+    expect(report).toContain("Model Markdown validation failed");
+    const status = JSON.parse(
+      await readFile(join(outputPath, ".evidence/generation-status.json"), "utf8")
+    ) as Array<{ status: string }>;
+    expect(status).toEqual(expect.arrayContaining([expect.objectContaining({ status: "failed" })]));
+  });
+
   it("rejects malformed or unsafe Markdown before writing model artifacts", () => {
     expect(() => validateMarkdownSections("# 治理报告\n", ["## 扫描结果"])).toThrow(
       "Model Markdown validation failed"

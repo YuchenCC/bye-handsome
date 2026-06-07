@@ -1,4 +1,5 @@
 import type { ProjectProfile } from "../agent/types.js";
+import { renderConstraintList } from "../generators/templates.js";
 import { writePackageFile } from "../generators/packageWriter.js";
 import type { ModelClient } from "../model/modelClient.js";
 import {
@@ -161,18 +162,7 @@ The generated prompt must include:
 
 ## Small Model Constraints
 
-不得发明不存在的 import。
-不得新增第三方依赖。
-不得编造项目中不存在的组件。
-不得编造接口方法。
-不得绕过项目既有 request wrapper。
-不得编造权限、字典或业务字段。
-不得猜测后端接口入参和出参。
-字段不确定时必须使用 TODO。
-不得修改无关文件。
-不得进行未请求的大重构。
-必须输出待确认事项。
-必须输出变更文件 ESLint 回检建议。
+${renderConstraintList()}
 
 ## Changed-file ESLint Flow
 

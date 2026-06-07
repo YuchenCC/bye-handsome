@@ -1,8 +1,9 @@
 import type { InventoryResult, ProjectProfile, TemplateExampleResult } from "../agent/types.js";
-import { buildEvidencePackage, writeEvidencePackage } from "../evidence/evidencePackage.js";
-import { writePackageFile, writePackageJson } from "../generators/packageWriter.js";
+import { buildEvidencePackageWithSnippets, writeEvidencePackage } from "../evidence/evidencePackage.js";
+import { writePackageFile, writePackageJson, writeValidatedPackageJson } from "../generators/packageWriter.js";
 import {
   renderAgentUsage,
+  AI_CODING_CONSTRAINTS,
   renderAiCodingRules,
   renderGovernanceReport,
   renderInventoryDoc,
@@ -17,6 +18,11 @@ import {
   renderUserGuide
 } from "../generators/templates.js";
 import type { ModelClient } from "../model/modelClient.js";
+import {
+  inventoryArraySchema,
+  pageApiRelationsSchema,
+  projectProfileSchema
+} from "../model/packageSchemas.js";
 import {
   assertNoBusinessPatchContent,
   validateMarkdownSections,
@@ -38,12 +44,17 @@ export async function contextDocGenerateSkill(options: ContextDocGenerateOptions
     inventory: options.inventory,
     templates: options.templates
   };
-  const evidence = buildEvidencePackage(input);
-  const governanceReport = await renderGovernanceReportWithModel(options, evidence);
-  const qwenContextPolicy = await renderQwenPolicyWithModel(options, evidence);
+  const generationStatus: Array<{ artifact: string; skill: string; status: "model" | "fallback" | "failed"; reason?: string }> = [];
+  const evidence = await buildEvidencePackageWithSnippets(input, generationStatus);
+  const governanceReportResult = await renderGovernanceReportWithModel(options, evidence);
+  generationStatus.push(governanceReportResult.status);
+  const qwenContextPolicyResult = await renderQwenPolicyWithModel(options, evidence);
+  generationStatus.push(qwenContextPolicyResult.status);
+  const finalEvidence = { ...evidence, generationStatus };
+  const governanceReport = renderGovernanceReportWithStatus(governanceReportResult.markdown, generationStatus);
 
   await Promise.all([
-    writeEvidencePackage(options.outputPath, evidence),
+    writeEvidencePackage(options.outputPath, finalEvidence),
     writePackageFile(options.outputPath, "docs/ai/README_AI.md", renderUserGuide()),
     writePackageFile(options.outputPath, "docs/ai/system-profile.md", renderSystemProfile(input)),
     writePackageFile(
@@ -76,35 +87,30 @@ export async function contextDocGenerateSkill(options: ContextDocGenerateOptions
       governanceReport
     ),
     writePackageFile(options.outputPath, "AGENT_USAGE.md", renderAgentUsage()),
-    writePackageJson(options.outputPath, ".ai-index/project-profile.json", options.profile),
-    writePackageJson(options.outputPath, ".ai-index/pages.json", options.inventory.pages),
-    writePackageJson(options.outputPath, ".ai-index/components.json", options.inventory.components),
-    writePackageJson(options.outputPath, ".ai-index/apis.json", options.inventory.apis),
-    writePackageJson(options.outputPath, ".ai-index/routes.json", options.inventory.routes),
-    writePackageJson(
+    writeValidatedPackageJson(options.outputPath, ".ai-index/project-profile.json", options.profile, projectProfileSchema),
+    writeValidatedPackageJson(options.outputPath, ".ai-index/pages.json", options.inventory.pages, inventoryArraySchema),
+    writeValidatedPackageJson(options.outputPath, ".ai-index/components.json", options.inventory.components, inventoryArraySchema),
+    writeValidatedPackageJson(options.outputPath, ".ai-index/apis.json", options.inventory.apis, inventoryArraySchema),
+    writeValidatedPackageJson(options.outputPath, ".ai-index/routes.json", options.inventory.routes, inventoryArraySchema),
+    writeValidatedPackageJson(
       options.outputPath,
       ".ai-index/request-wrappers.json",
-      options.inventory.requestWrappers
+      options.inventory.requestWrappers,
+      inventoryArraySchema
     ),
-    writePackageJson(
+    writeValidatedPackageJson(
       options.outputPath,
       ".ai-index/page-api-relations.json",
-      options.inventory.pageApiRelations
+      options.inventory.pageApiRelations,
+      pageApiRelationsSchema
     ),
     writePackageJson(options.outputPath, ".ai-index/templates.json", options.templates.examples),
     writePackageJson(options.outputPath, ".ai-index/examples.json", options.templates.examples),
     writePackageJson(options.outputPath, ".ai-index/rules.json", {
-      constraints: [
-        "no invented imports",
-        "no new dependencies",
-        "no invented components",
-        "no invented APIs",
-        "use TODO for uncertain fields",
-        "no unrelated edits"
-      ]
+      constraints: [...AI_CODING_CONSTRAINTS]
     }),
     writePackageFile(options.outputPath, ".ai-context/qwen32b-system-prompt.md", renderQwenSystemPrompt()),
-    writePackageFile(options.outputPath, ".ai-context/qwen32b-context-policy.md", qwenContextPolicy),
+    writePackageFile(options.outputPath, ".ai-context/qwen32b-context-policy.md", qwenContextPolicyResult.markdown),
     writePackageFile(options.outputPath, ".ai-context/qwen32b-output-format.md", renderQwenOutputFormat()),
     writePackageFile(options.outputPath, ".ai-context/qwen32b-plan-do-policy.md", renderPlanDoPolicy()),
     writePackageFile(options.outputPath, ".ai-context/qwen32b-quality-check.md", renderQualityCheckPolicy()),
@@ -114,10 +120,12 @@ export async function contextDocGenerateSkill(options: ContextDocGenerateOptions
 
 async function renderQwenPolicyWithModel(
   options: ContextDocGenerateOptions,
-  evidence: ReturnType<typeof buildEvidencePackage>
-): Promise<string> {
+  evidence: Awaited<ReturnType<typeof buildEvidencePackageWithSnippets>>
+): Promise<{ markdown: string; status: { artifact: string; skill: string; status: "model" | "fallback" | "failed"; reason?: string } }> {
+  const artifact = ".ai-context/qwen32b-context-policy.md";
+  const skill = "qwen-context-policy-generate-skill";
   if (!options.modelClient) {
-    return withFallbackMarker(renderQwenPolicy());
+    return { markdown: withFallbackMarker(renderQwenPolicy()), status: { artifact, skill, status: "fallback", reason: "model client unavailable" } };
   }
 
   try {
@@ -130,27 +138,34 @@ async function renderQwenPolicyWithModel(
     });
     validateMarkdownSections(markdown, ["# Qwen32B Context Policy"]);
     assertNoBusinessPatchContent(markdown);
-    return markdown;
+    return { markdown, status: { artifact, skill, status: "model" } };
   } catch (error) {
     if (isModelUnavailable(error)) {
-      return withFallbackMarker(renderQwenPolicy());
+      return { markdown: withFallbackMarker(renderQwenPolicy()), status: { artifact, skill, status: "fallback", reason: error instanceof Error ? error.message : String(error) } };
     }
-    throw error;
+    return {
+      markdown: withFallbackMarker(renderQwenPolicy()),
+      status: {
+        artifact,
+        skill,
+        status: "failed",
+        reason: error instanceof Error ? error.message : String(error)
+      }
+    };
   }
 }
 
 async function renderGovernanceReportWithModel(
   options: ContextDocGenerateOptions,
-  evidence: ReturnType<typeof buildEvidencePackage>
-): Promise<string> {
+  evidence: Awaited<ReturnType<typeof buildEvidencePackageWithSnippets>>
+): Promise<{ markdown: string; status: { artifact: string; skill: string; status: "model" | "fallback" | "failed"; reason?: string } }> {
+  const artifact = "docs/ai/governance-report.md";
+  const skill = "governance-report-generate-skill";
   if (!options.modelClient) {
-    return withFallbackMarker(
-      renderGovernanceReport({
-        profile: options.profile,
-        inventory: options.inventory,
-        templates: options.templates
-      })
-    );
+    return {
+      markdown: withFallbackMarker(renderGovernanceReport({ profile: options.profile, inventory: options.inventory, templates: options.templates })),
+      status: { artifact, skill, status: "fallback", reason: "model client unavailable" }
+    };
   }
 
   try {
@@ -163,19 +178,39 @@ async function renderGovernanceReportWithModel(
     });
     validateMarkdownSections(markdown, ["# 治理报告", "## 扫描结果", "## 待人工确认"]);
     assertNoBusinessPatchContent(markdown);
-    return markdown;
+    return { markdown, status: { artifact, skill, status: "model" } };
   } catch (error) {
     if (isModelUnavailable(error)) {
-      return withFallbackMarker(
-        renderGovernanceReport({
-          profile: options.profile,
-          inventory: options.inventory,
-          templates: options.templates
-        })
-      );
+      return {
+        markdown: withFallbackMarker(renderGovernanceReport({ profile: options.profile, inventory: options.inventory, templates: options.templates })),
+        status: { artifact, skill, status: "fallback", reason: error instanceof Error ? error.message : String(error) }
+      };
     }
-    throw error;
+    return {
+      markdown: withFallbackMarker(renderGovernanceReport({ profile: options.profile, inventory: options.inventory, templates: options.templates })),
+      status: { artifact, skill, status: "failed", reason: error instanceof Error ? error.message : String(error) }
+    };
   }
+}
+
+function renderGovernanceReportWithStatus(
+  markdown: string,
+  generationStatus: Array<{ artifact: string; skill: string; status: string; reason?: string }>
+): string {
+  const fallbackItems = generationStatus.filter((item) => item.status === "fallback");
+  const failedItems = generationStatus.filter((item) => item.status === "failed");
+  return `${markdown.trimEnd()}
+
+## 生成状态
+
+### Fallback 产物
+
+${fallbackItems.map((item) => `- ${item.artifact}：${item.reason ?? "fallback"}`).join("\n") || "- 暂无"}
+
+### Failed 产物
+
+${failedItems.map((item) => `- ${item.artifact}：${item.reason ?? "failed"}`).join("\n") || "- 暂无"}
+`;
 }
 
 function isModelUnavailable(error: unknown): boolean {

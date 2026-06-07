@@ -44,7 +44,7 @@ describe("sourceInventorySkill", () => {
   it("scans Vue pages, components, APIs, and routes", async () => {
     const root = await createRoot();
     await createFile(root, "src/pages/UserList.vue", "<template />");
-    await createFile(root, "src/components/UserTable.vue", "<template />");
+    await createFile(root, "src/components/UserTable.vue", "<script>export default { props: { value: String } }</script>");
     await createFile(root, "src/api/user.ts", "export const listUsers = () => request.get('/users');");
     await createFile(root, "src/utils/request.ts", "export const request = {};");
     await createFile(root, "src/router/index.ts", "export default [{ path: '/users' }];");
@@ -58,25 +58,34 @@ describe("sourceInventorySkill", () => {
       expect.objectContaining({ name: "UserTable", filePath: "src/components/UserTable.vue" })
     ]);
     expect(inventory.apis).toEqual([
-      expect.objectContaining({ name: "user", filePath: "src/api/user.ts" })
+      expect.objectContaining({ name: "user", filePath: "src/api/user.ts", method: "get", path: "/users" })
     ]);
     expect(inventory.routes).toEqual([
-      expect.objectContaining({ name: "index", filePath: "src/router/index.ts" })
+      expect.objectContaining({ name: "index", filePath: "src/router/index.ts", routePath: "/users" })
     ]);
     expect(inventory.requestWrappers).toEqual([
       expect.objectContaining({ name: "request", filePath: "src/utils/request.ts" })
     ]);
     expect(inventory.pageApiRelations).toEqual([
-      { pageFilePath: "src/pages/UserList.vue", apiFilePath: "src/api/user.ts", confidence: "name-match" }
+      expect.objectContaining({
+        pageFilePath: "src/pages/UserList.vue",
+        apiFilePath: "src/api/user.ts",
+        confidence: "name-match",
+        evidence: expect.any(String)
+      })
     ]);
-    expect(inventory.confirmationItems).toEqual([]);
+    expect(inventory.confirmationItems).toEqual(["权限规则待确认", "字典规则待确认"]);
   });
 
   it("scans React and Umi source inventory with route config files", async () => {
     const root = await createRoot();
     await createFile(root, "src/pages/Dashboard.tsx", "export function Dashboard() {}");
-    await createFile(root, "src/components/MetricCard.tsx", "export function MetricCard() {}");
-    await createFile(root, "src/services/dashboard.ts", "export async function fetchMetrics() {}");
+    await createFile(
+      root,
+      "src/components/MetricCard.tsx",
+      "type MetricCardProps = { value: string; disabled?: boolean };\nexport function MetricCard(props: MetricCardProps) { return null; }"
+    );
+    await createFile(root, "src/services/dashboard.ts", "export async function fetchMetrics() { return request.post('/api/dashboard'); }");
     await createFile(root, "src/request.ts", "export const request = {};");
     await createFile(root, "config/routes.ts", "export default [{ path: '/dashboard' }];");
 
@@ -86,13 +95,17 @@ describe("sourceInventorySkill", () => {
       expect.objectContaining({ name: "Dashboard", filePath: "src/pages/Dashboard.tsx" })
     ]);
     expect(inventory.components).toEqual([
-      expect.objectContaining({ name: "MetricCard", filePath: "src/components/MetricCard.tsx" })
+      expect.objectContaining({
+        name: "MetricCard",
+        filePath: "src/components/MetricCard.tsx",
+        props: expect.arrayContaining(["value", "disabled"])
+      })
     ]);
     expect(inventory.apis).toEqual([
-      expect.objectContaining({ name: "dashboard", filePath: "src/services/dashboard.ts" })
+      expect.objectContaining({ name: "dashboard", filePath: "src/services/dashboard.ts", method: "post", path: "/api/dashboard" })
     ]);
     expect(inventory.routes).toEqual([
-      expect.objectContaining({ name: "routes", filePath: "config/routes.ts" })
+      expect.objectContaining({ name: "routes", filePath: "config/routes.ts", routePath: "/dashboard" })
     ]);
     expect(inventory.requestWrappers).toEqual([
       expect.objectContaining({ name: "request", filePath: "src/request.ts" })
@@ -101,9 +114,30 @@ describe("sourceInventorySkill", () => {
       {
         pageFilePath: "src/pages/Dashboard.tsx",
         apiFilePath: "src/services/dashboard.ts",
-        confidence: "name-match"
+        confidence: "name-match",
+        evidence: expect.any(String)
       }
     ]);
+  });
+
+  it("records categorized unresolved items for missing scan facts", async () => {
+    const root = await createRoot();
+    await createFile(root, "src/pages/Loose.tsx", "export function Loose() { return null; }");
+    await createFile(root, "src/components/LooseCard.tsx", "export function LooseCard(props) { return null; }");
+    await createFile(root, "src/services/loose.ts", "export function listLoose() { return request('/loose'); }");
+
+    const inventory = await sourceInventorySkill(profile(root, "react"));
+
+    expect(inventory.unresolvedItems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ category: "route" }),
+        expect.objectContaining({ category: "request-wrapper" }),
+        expect.objectContaining({ category: "api-contract" }),
+        expect.objectContaining({ category: "component-props" }),
+        expect.objectContaining({ category: "permission" }),
+        expect.objectContaining({ category: "dictionary" })
+      ])
+    );
   });
 
   it("extracts representative examples from inventory results", async () => {

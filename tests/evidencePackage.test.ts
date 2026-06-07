@@ -1,4 +1,4 @@
-import { access, mkdtemp, readFile, rm } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -6,6 +6,7 @@ import type { InventoryResult, ProjectProfile, TemplateExampleResult } from "../
 import {
   DEFAULT_SNIPPET_LIMITS,
   buildEvidencePackage,
+  buildEvidencePackageWithSnippets,
   writeEvidencePackage
 } from "../src/evidence/evidencePackage.js";
 
@@ -88,5 +89,21 @@ describe("evidence package", () => {
       await readFile(join(outputPath, ".evidence/unresolved-items.json"), "utf8")
     ) as Array<{ message: string }>;
     expect(unresolved.map((item) => item.message)).toContain("未识别到 request wrapper");
+  });
+
+  it("writes bounded source snippet content for selected candidates", async () => {
+    const root = await mkdtemp(join(tmpdir(), "evidence-snippet-source-"));
+    testRoots.push(root);
+    await mkdir(join(root, "src/api"), { recursive: true });
+    await writeFile(join(root, "src/api/order.ts"), "export const listOrders = () => request.get('/api/orders');\n", "utf8");
+    const evidence = await buildEvidencePackageWithSnippets({
+      profile: { ...profile, root },
+      inventory,
+      templates
+    });
+
+    expect(evidence.snippets.items.length).toBeGreaterThan(0);
+    const snippetWithContent = evidence.snippets.items.find((item) => item.content.trim().length > 0);
+    expect(snippetWithContent).toEqual(expect.objectContaining({ filePath: expect.stringMatching(/^src\//) }));
   });
 });

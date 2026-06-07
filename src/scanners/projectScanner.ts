@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import type { FrontendStack, ProjectProfile } from "../agent/types.js";
 
@@ -33,8 +33,8 @@ export async function scanProjectProfile(root: string): Promise<ProjectProfile> 
     styleSystem: detectStyleSystem(depNames),
     qualityConfig: detectQualityConfig(depNames),
     commands: packageJson.scripts ?? {},
-    packageManager: "npm",
-    sourceDirs: ["src"],
+    packageManager: await detectPackageManager(root),
+    sourceDirs: await detectSourceDirs(root),
     confirmationItems:
       stackResult.stack === "unknown" ? ["Unable to identify frontend stack"] : []
   };
@@ -85,6 +85,7 @@ function detectRequestLayer(depNames: string[]): string | undefined {
   if (depNames.includes("axios")) return "axios";
   if (depNames.includes("umi-request")) return "umi-request";
   if (depNames.includes("@umijs/request")) return "@umijs/request";
+  if (depNames.includes("whatwg-fetch") || depNames.includes("isomorphic-fetch")) return "fetch";
   return undefined;
 }
 
@@ -99,14 +100,54 @@ function detectRouteStyle(depNames: string[]): string | undefined {
 
 function detectStyleSystem(depNames: string[]): string | undefined {
   if (depNames.includes("tailwindcss")) return "tailwindcss";
+  if (depNames.includes("unocss")) return "unocss";
   if (depNames.includes("sass") || depNames.includes("node-sass")) return "sass";
   if (depNames.includes("less")) return "less";
   if (depNames.includes("styled-components")) return "styled-components";
+  if (depNames.some((name) => name.includes("css-loader"))) return "css-modules";
   return undefined;
 }
 
 function detectQualityConfig(depNames: string[]): string[] {
   return depNames.filter((name) =>
-    ["eslint", "prettier", "stylelint", "typescript"].includes(name)
+    ["eslint", "prettier", "stylelint", "typescript", "vuex", "pinia", "redux", "@reduxjs/toolkit"].includes(name)
   );
+}
+
+async function detectPackageManager(root: string): Promise<string> {
+  if (await fileExists(join(root, "pnpm-lock.yaml"))) return "pnpm";
+  if (await fileExists(join(root, "yarn.lock"))) return "yarn";
+  if (await fileExists(join(root, "package-lock.json"))) return "npm";
+  return "npm";
+}
+
+async function detectSourceDirs(root: string): Promise<string[]> {
+  const candidates = ["src", "packages", "app"];
+  const existing = [];
+  for (const candidate of candidates) {
+    try {
+      if ((await stat(join(root, candidate))).isDirectory()) {
+        existing.push(candidate);
+      }
+    } catch {
+      // Ignore missing conventional source directories.
+    }
+  }
+
+  if (existing.length > 0) return existing;
+  try {
+    const entries = await readdir(root, { withFileTypes: true });
+    const firstSourceLike = entries.find((entry) => entry.isDirectory() && !entry.name.startsWith("."));
+    return firstSourceLike ? [firstSourceLike.name] : ["src"];
+  } catch {
+    return ["src"];
+  }
+}
+
+async function fileExists(path: string): Promise<boolean> {
+  try {
+    return (await stat(path)).isFile();
+  } catch {
+    return false;
+  }
 }

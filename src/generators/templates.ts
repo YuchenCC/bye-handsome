@@ -6,6 +6,25 @@ export interface ContextTemplateInput {
   templates: TemplateExampleResult;
 }
 
+export const AI_CODING_CONSTRAINTS = [
+  "不得发明不存在的 import。",
+  "不得新增第三方依赖。",
+  "不得编造项目中不存在的组件。",
+  "不得编造接口方法。",
+  "不得绕过项目既有 request wrapper。",
+  "不得编造权限、字典或业务字段。",
+  "不得猜测后端接口入参和出参。",
+  "字段不确定时必须使用 TODO。",
+  "不得修改无关文件。",
+  "不得进行未请求的大重构。",
+  "必须输出待确认事项。",
+  "必须输出变更文件 ESLint 回检建议。"
+] as const;
+
+export function renderConstraintList(): string {
+  return AI_CODING_CONSTRAINTS.map((constraint) => `- ${constraint}`).join("\n");
+}
+
 export function renderSystemProfile({ profile }: ContextTemplateInput): string {
   return `# 系统画像
 
@@ -33,14 +52,7 @@ ${rows.map((row) => `- ${row.name ?? "未命名"}：\`${row.filePath}\``).join("
 export function renderAiCodingRules(): string {
   return `# AI Coding 规则
 
-- 不得发明不存在的 import。
-- 不得新增第三方依赖。
-- 不得编造项目中不存在的组件。
-- 不得编造接口方法。
-- 不得绕过项目既有 request wrapper。
-- 字段不确定时必须使用 TODO。
-- 不得修改无关文件。
-- 不得进行未请求的大重构。
+${renderConstraintList()}
 `;
 }
 
@@ -121,6 +133,10 @@ export function renderQwenPolicy(): string {
   return `# Qwen32B Context Policy
 
 每次任务只注入最小必要上下文：AI coding rules、一个任务模板、少量相似页面、相关组件、服务示例和质量检查规则。不得一次性注入全部项目文档或全部源码。
+
+## Small Model Constraints
+
+${renderConstraintList()}
 `;
 }
 
@@ -134,7 +150,12 @@ export function renderQwenSystemPrompt(): string {
 export function renderQwenOutputFormat(): string {
   return `# Output Format
 
-先输出计划，再输出文件级修改说明，最后输出 patch 或代码块。所有不确定项必须标记 TODO。
+1. 先输出任务理解和待确认事项。
+2. 再输出文件级变更计划，并等待用户确认。
+3. 用户确认后，才允许输出限定在本任务范围内的 patch 或代码块。
+4. 必须列出 Expected Changed Files。
+5. 所有不确定项必须标记 TODO。
+6. 不得输出无关文件修改，不得扩大重构范围。
 `;
 }
 

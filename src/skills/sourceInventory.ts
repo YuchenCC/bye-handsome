@@ -18,6 +18,14 @@ export async function sourceInventorySkill(profile: ProjectProfile): Promise<Inv
     routes: [],
     requestWrappers: [],
     pageApiRelations: [],
-    confirmationItems: ["未知技术栈，未执行页面/组件/API 扫描"]
+    confirmationItems: ["未知技术栈，未执行页面/组件/API 扫描"],
+    unresolvedItems: [
+      {
+        source: "inventory",
+        category: "project-profile",
+        message: "未知技术栈，未执行页面/组件/API 扫描",
+        severity: "warning"
+      }
+    ]
   };
 }

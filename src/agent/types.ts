@@ -44,6 +44,7 @@ export interface InventoryResult {
   requestWrappers: InventoryRequestWrapper[];
   pageApiRelations: InventoryPageApiRelation[];
   confirmationItems: string[];
+  unresolvedItems?: GovernanceUnresolvedItem[];
 }
 
 export interface InventoryPage {
@@ -81,7 +82,35 @@ export interface InventoryRequestWrapper {
 export interface InventoryPageApiRelation {
   pageFilePath: string;
   apiFilePath: string;
-  confidence: "name-match";
+  confidence: "import-reference" | "name-match";
+  evidence?: string;
+}
+
+export type UnresolvedCategory =
+  | "project-profile"
+  | "route"
+  | "api-contract"
+  | "component-props"
+  | "request-wrapper"
+  | "permission"
+  | "dictionary"
+  | "business-field"
+  | "model-generation"
+  | "schema-validation";
+
+export interface GovernanceUnresolvedItem {
+  source: string;
+  category: UnresolvedCategory;
+  message: string;
+  filePath?: string;
+  severity: "info" | "warning" | "error";
+}
+
+export interface GenerationStatusItem {
+  artifact: string;
+  skill: string;
+  status: "model" | "fallback" | "failed";
+  reason?: string;
 }
 
 export interface TemplateExampleResult {

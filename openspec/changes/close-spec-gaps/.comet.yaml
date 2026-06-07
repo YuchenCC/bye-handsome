@@ -1,5 +1,5 @@
 workflow: full
-phase: verify
+phase: archive
 build_mode: executing-plans
 build_pause: null
 isolation: worktree
@@ -7,11 +7,11 @@ verify_mode: full
 base_ref: cad963a7bc0e877f5915c65b39a81cc3a7789cf7
 design_doc: docs/superpowers/specs/2026-06-07-close-spec-gaps-design.md
 plan: docs/superpowers/plans/2026-06-07-close-spec-gaps.md
-verify_result: pending
+verify_result: pass
 verification_report: docs/superpowers/reports/2026-06-07-close-spec-gaps-verify.md
-branch_status: pending
+branch_status: handled
 created_at: 2026-06-07
-verified_at: null
+verified_at: 2026-06-07
 archived: false
 handoff_context: openspec/changes/close-spec-gaps/.comet/handoff/design-context.json
 handoff_hash: 1a2a4c736bd19d25af3fb85ffb1635d257b0f3323bb7f8f3794925111f7a912a
